@@ -1,12 +1,12 @@
-# InteractiveBrokers -> FURS eDavki konverter
-_Skripta, ki prevede XML poročilo trgovalnih poslov, dividend in obresti Stock Yield Enhancement programa v platformi InteractiveBrokers v XML format primeren za uvoz v obrazce:_
+# Revolut -> FURS eDavki konverter
+_Skripta, ki prevede Revolut CSV poročilo trgovalnih poslov, dividend in obresti (Flexible Cash Funds) v XML format primeren za uvoz v obrazce:_
 * _Doh-KDVP - Napoved za odmero dohodnine od dobička od odsvojitve vrednostnih papirjev in drugih deležev ter investicijskih kuponov,_
 * _D-IFI - Napoved za odmero davka od dobička od odsvojitve izvedenih finančnih instrumentov in_
 * _Doh-Div - Napoved za odmero dohodnine od dividend_
 * _Doh-Obr - Napoved za odmero dohodnine od obresti_
-_v eDavkih Finančne uprave_
+_v eDavkih Finančne uprave._
 
-Poleg pretvorbe vrednosti skripta naredi še konverzijo iz tujih valut v EUR po tečaju Banke Slovenije na dan posla.
+Poleg pretvorbe vrednosti skripta naredi še konverzijo iz tujih valut v EUR po tečaju Banke Slovenije na dan posla (če za ta dan tečaja ni, uporabi zadnji predhodni razpoložljiv tečaj).
 
 ## Izjava o omejitvi odgovornosti
 
@@ -16,7 +16,7 @@ napovedi. Za pravilnost davčne napovedi si odgovoren sam in avtor(ji) skripte z
 
 Če ti je skripta prihranila nekaj ur, nam največ veselja narediš s tem, da nekaj dobička podariš v dober namen. Slikaj priloženo QR kodo s svojo priljubljeno bančno aplikacijo ali klikni na njo:
 
-[![ib-edavki / ZPM donacija](https://www.zveza-anitaogulin.si/wp-content/uploads/2024/07/QR-koda-za-BOTRSTVO-115.jpg)](https://www.zveza-anitaogulin.si/donatorji/donacija/)
+[![revolut-davki / ZPM donacija](https://www.zveza-anitaogulin.si/wp-content/uploads/2024/07/QR-koda-za-BOTRSTVO-115.jpg)](https://www.zveza-anitaogulin.si/donatorji/donacija/)
 
 ## Uporaba
 
@@ -24,70 +24,148 @@ napovedi. Za pravilnost davčne napovedi si odgovoren sam in avtor(ji) skripte z
 
 Na računalniku imej [zadnjo verzijo Python 3](https://www.python.org/downloads/) in [git](https://git-scm.com/downloads).
 
+#### Namestitev `uv` (priporočeno)
+
+`uv` je hiter upravljalnik Python okolij in paketov.
+
+Linux/macOS:
 ```
-pip install --upgrade git+https://github.com/jamsix/ib-edavki.git
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Windows (PowerShell):
+```
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Preveri namestitev:
+```
+uv --version
+```
+
+Namestitev orodja z `uv`:
+```
+uv tool install git+https://github.com/offlinehacker/revolut-davki.git
+```
+
+Lahko pa ga zaženeš tudi brez trajne namestitve:
+```
+uvx --from git+https://github.com/offlinehacker/revolut-davki.git revolut_davki --help
+```
+
+#### Namestitev s `pip` (alternativa)
+
+```
+pip install --upgrade git+https://github.com/offlinehacker/revolut-davki.git
 ```
 
 ```
-ib_edavki
+revolut_davki
 ```
 
 Odpri datoteko **taxpayer.xml** in vnesi svoje davčne podatke.
 
-### Izvoz poročila v platformi InteractiveBrokers
+### Izvoz poročila v Revolut
 
-1. V meniju **Performance & reports** odpri **Flex Queries**
-1. Desno od napisa *Activity Flex Query* kliknite *+* za kreiranje novega poročila.
-1. Vpiši poljuben **Query Name**
-1. Pod **Sections** klikni na **Account Information**. Izberi **IB Entity** in **Account ID** in potem na dnu Save.
-1. Pod **Sections** klikni na **Trades**. Pod Options označi **Executions** in **Closed Lots**. Izberi vse vrstice (**Select All**).
-1. Pod **Sections** klikni na **Corporate Actions**. Izberi vse vrstice (**Select All**).
-1. Pod **Sections** klikni na **Cash Transactions**. Pod Options označi **Dividends**, **Payment in Lieu of Dividends**, **Withholding Tax**, **Broker Fees** in **Broker Interest Received**. Izberi vse vrstice (**Select All**).
-1. Pod **Sections** klikni na **Financial Instrument Information**. Izberi vse vrstice (**Select All**).
-1. Vse ostale nastavitve pusti tako kot so (datumske nastavitve bomo spreminjali ob zaganjanju poročila).
-1. Na dnu klikni **Continue** in nato **Create**, za tem bo treba še enkrat **Ok** in bomo nazaj na oknu **Flex Queries**.
-1. V pogledu **Performance & Reports > Flex Queries** se je pod **Activity Flex Query** pojavila nova vrstica s tvojim novim poročilom.
-1. Poročilo zaženeš s klikom na puščico v desno poleg imena poročila. Tam sedaj spremeniš **Period** na **Custom Date Range** in spodaj ta rang nastaviš na prvi in zadnji dan leta za katerega generiraš (če katerega od datumov ni možno izbrati, beri spodnjo opombo glede Brexita). Potem samo poženi poročilo in dobiš datoteko.
-1. Ponovi postopek za vsako leto trgovanja, če si trgoval v letih 2016, 2017 in 2018, generiraj 3 reporte, po enega za vsako leto. Za pravilen izračun tujega davka na dividende (Withholding Tax) je potrebno generirati tudi report tekočega leta, saj so nekateri obračuni poročani za nazaj.
+1. V Revolut odpri **Investments** in nato **Statements** (oziroma enakovreden meni za izvoz poročil).
+1. Izberi letno obdobje (od **1. 1.** do **31. 12.** za leto napovedi).
+1. Izberi **Consolidated statement** in format **CSV**.
+1. Preveri, da poročilo vsebuje sekcije:
+   - `Transactions for Brokerage Account sells`
+   - `Transactions for Brokerage Account dividends`
+   - `Transactions for Flexible Cash Funds`
+1. Datoteko shrani lokalno (npr. `consolidated-statement_2025-01-01_2025-12-31.csv`).
 
 **Pozor**:
-Pred 2021 smo slovenske stranke IBKR imele račun na britanski podružnici IBUK. 2021 so bili naši računi večinoma preneseni na madžarsko podružnico IBCE, v sredini leta 2024 pa iz madžarske na irsko podružnico IBIE. Pri migraciji smo uporabniki obdržali uporabniško ime, toda dobili smo nov IBKR račun (Uxxxxxxx). Zato je pomembno, da pri izdelavi poročila izberemo vse račune, ki so bili aktivni v izbranem letu.
+Če uporabljaš starejši Revolut izvoz ali CSV brez zgornjih sekcij, pretvorba ne bo popolna.
 
-Na strani **Reports** je desno od številke računa v modrem ovalu gumb **Select Account(s)**. S klikom nanj se odpre meni kjer lahko izbiraš za kateri račun želiš poročila. Privzeto računi, ki niso več aktivni niso prikazani, zato klikni na ikono za filtriranje in označi vse tipe računov: Open, Closed in Migrated. Sedaj izbereš vse račune in klikneš **Continue**. Poleg naslova **Reports** boš nato videl vse številke računov, prav tako pa bodo podatki v poročilu sedaj iz vseh računov.
-
-### Konverzija IB poročila v popisne liste primerne za uvoz v eDavke
+### Konverzija Revolut poročila v popisne liste primerne za uvoz v eDavke
 
 ```
-ib_edavki [-h] [-y report-year] [-t] ib-xml-file-2021 [ib-xml-file-2020] [ib-xml-file-2019]
+revolut_davki --revolut revolut-izvoz.csv [-y report-year] [-t] [--ignore-foreign-tax]
 ```
-Kot argument dodaj reporte za vsa leta trgovanja, npr:
+Primer:
 ```
-ib_edavki ib-export-2020.xml ib-export-2021.xml ib-export-2022.xml
+revolut_davki --revolut consolidated-statement_2025-01-01_2025-12-31.csv -y 2025
+```
+Primer brez uveljavljanja tujega davka pri dividendah:
+```
+revolut_davki --revolut consolidated-statement_2025-01-01_2025-12-31.csv -y 2025 --ignore-foreign-tax
 ```
 
 Skripta po uspešni konverziji v lokalnem direktoriju ustvari štiri datoteke:
 * Doh-KDVP.xml (datoteka namenjena uvozu v obrazec Doh-KDVP - Napoved za odmero dohodnine od dobička od odsvojitve vrednostnih papirjev in drugih deležev ter investicijskih kuponov)
 * D-IFI.xml (datoteka namenjena uvozu v obrazec D-IFI - Napoved za odmero davka od dobička od odsvojitve izvedenih finančnih instrumentov)
-* D-Div.xml (datoteka namenjena uvozu v obrazec D-Div - Napoved za odmero dohodnine od dividend)
+* Doh-Div.xml (datoteka namenjena uvozu v obrazec Doh-Div - Napoved za odmero dohodnine od dividend)
 * Doh-Obr.xml (datoteka namenjena uvozu v obrazec Doh-Obr - Napoved za odmero dohodnine od obresti)
 
 #### -y <leto> (opcijsko)
-Leto za katerega se izdelajo popisni listi. Privzeto trenutno leto.
+Leto za katerega se izdelajo popisni listi. Privzeto preteklo leto.
 
 #### -t (opcijsko)
 eDavki ne omogočajo dodajanje popisnih listov za tekoče leto, temveč le za preteklo. Parameter *-t* spremeni datume vseh poslov v preteklo leto, kar omogoča uvoz popisnih listov in **informativni izračun davka** že za tekoče leto. Konverzija iz tuje valute v EUR je kljub temu opravljena na pravi datum posla.
 
 **Pozor: namenjeno informativnemu izračunu, ne oddajaj obrazca napolnjenega s temi podatki!**
 
+### Testiranje
+
+Repo vsebuje sintetičen testni CSV (`tests/fixtures/revolut_synthetic_2025.csv`) z izmišljenimi podatki in majhnimi zneski, ki preveri osnovni end-to-end tok generiranja XML-jev v začasnem direktoriju.
+
+Zagon testa:
+```
+python -m unittest tests/test_synthetic_revolut_pipeline.py
+```
+
 #### Dodatni podatki o podjetju za obrazec Doh-Div (opcijsko)
-Obrazec Doh-Div zahteva dodatne podatke o podjetju, ki je izplačalo dividende (identifikacijska številka, naslov, ...), ki jih v izvirnih podatkih IBja ni. Ob prvi uporabi, skripta prenese datoteki `companies.xml` in `relief-statement.xml`, ki že vsebujeta nekaj podjetij in sporazumov o izogibanju dvojnega obdavčevanja. Manjkajoča podjetja lahko dodaš v `companies-local.xml` ali pa manjkajoče podatke po uvozu obrazca vneseš v eDavkih.
+Obrazec Doh-Div zahteva dodatne podatke o podjetju, ki je izplačalo dividende (identifikacijska številka, naslov, ...), ki jih v izvirnih podatkih Revoluta pogosto ni. Ob prvi uporabi skripta prenese datoteko `companies.xml`, ki že vsebuje nekaj podjetij. Manjkajoča podjetja lahko dodaš v `companies-local.xml` ali pa manjkajoče podatke po uvozu obrazca vneseš v eDavkih.
 *Če boš v `companies-local.xml` vnesel več novih podjetij, jih bomo avtomatično prenesli v `companies.xml` - prosimo, naredi pull request.*
 
-#### Podatki o podružnicah IB za obrazec Doh-Obr
-Obrazec Doh-Obr zahteva dodatne podatke o podružnici IB, ki je izplačevalka obresti Stock Yield Enhancement programa (identifikacijska številka, naziv, naslov, država) in jih v izvirnih podatkih IB-ja ni. Ob prvi uporabi skripta prenese datoteko `ib-affiliates.xml`, ki vsebuje zahtevane podatke za IB United Kingdom, IB Central Europe, IB Ireland in IB Luxembourg, po potrebi pa lahko te podatke spremeniš ali dodaš.
+Če je v Doh-Div izpolnjeno polje `ForeignTax` (tuji davek), eDavki zahtevajo obvezno prilogo `Dokazilo o plačilu tujega davka`. To je poslovno pravilo eDavkov (ne napaka XML strukture). Priloži izpis brokerja/statement, iz katerega so razvidni bruto dividenda, odtegnjeni tuji davek in datum izplačila.
+
+#### --ignore-foreign-tax (opcijsko)
+Ta parameter nastavi `ForeignTax` v `Doh-Div.xml` na `0.00` za vse dividende. Uporabno, če ne želiš uveljavljati odbitka tujega davka in se želiš izogniti obvezni prilogi `Dokazilo o plačilu tujega davka`.
+
+**Pozor**: pri uporabi tega parametra ne uveljavljaš odbitka tujega davka (lahko pomeni višjo slovensko davčno obveznost pri dividendah).
+
+#### Opomba za Doh-Obr (Flexible Cash Funds)
+Za obresti iz Flexible Cash Funds skripta v Doh-Obr vpiše:
+- bruto obresti iz vrstic `Interest PAID` (vrstice `Service Fee Charged` se ne štejejo med obresti),
+- pretvorbo v EUR po tečaju Banke Slovenije,
+- vrsto dohodka `7`,
+- izplačevalca `Revolut Securities Europe UAB`.
+
+### Referenčni dokumenti (sheme in navodila)
+Pri implementaciji in preverjanju mapiranja so bili uporabljeni naslednji uradni eDavki/FURS dokumenti:
+
+- XML sheme obrazcev:
+  - `https://edavki.durs.si/Documents/Schemas/Doh_KDVP_9.xsd`
+  - `https://edavki.durs.si/Documents/Schemas/D_IFI_4.xsd`
+  - `https://edavki.durs.si/Documents/Schemas/Doh_Div_3.xsd`
+  - `https://edavki.durs.si/Documents/Schemas/Doh_Obr_2.xsd`
+  - `https://edavki.durs.si/Documents/Schemas/EDP-Common-1.xsd`
+- Portal z dokumenti za Doh-Obr (druge obresti):
+  - `https://edavki.durs.si/EdavkiPortal/OpenPortal/CommonPages/Opdynp/PageD.aspx?category=odmera_dohodnine_od_drugih_obresti`
+- Navodila in tehnični dokumenti za Doh-Obr:
+  - `https://edavki.durs.si/OpenPortal/Dokumenti/doh_odm_dr_obr20.n.sl.pdf`
+  - `https://edavki.durs.si/OpenPortal/Dokumenti/doh_odm_dr_obr20.i.sl.pdf`
+  - `https://edavki.durs.si/OpenPortal/Dokumenti/doh_odm_obr_xml.n.sl.pdf`
+  - `https://edavki.durs.si/OpenPortal/Dokumenti/doh_odm_obr_xml.i.xlsx`
+- Portal z dokumenti za Doh-Div (dividende):
+  - `https://edavki.durs.si/EdavkiPortal/OpenPortal/CommonPages/Opdynp/PageD.aspx?category=odmera_dohodnine_od_dividend`
+- Navodila in tehnični dokumenti za Doh-Div:
+  - `https://edavki.durs.si/OpenPortal/Dokumenti/doh_odm_div20.n.sl.pdf`
+  - `https://edavki.durs.si/OpenPortal/Dokumenti/doh_odm_div.n.sl.pdf`
+  - `https://edavki.durs.si/OpenPortal/Dokumenti/doh_odm_div_xml.n.sl.pdf`
+  - `https://edavki.durs.si/OpenPortal/Dokumenti/doh_odm_div_xml.i.xlsx`
+
+Iz teh dokumentov izhajajo ključne odločitve v skripti:
+- pri Doh-Obr se poroča bruto obresti (v EUR),
+- za Flexible Cash Funds se uporablja vrsta dohodka `7`,
+- za Doh-Div sta v shemi predvidena tudi `CorpData` in `CorpDataDetail` (posebni primeri odsvojitve delnic/deležev), ki nista del običajnega mapiranja navadnih dividend,
+- pri Doh-Div eDavki zahtevajo prilogo `Dokazilo o plačilu tujega davka`, kadar je vpisan `ForeignTax` (tuji davek).
 
 ### Uvoz v eDavke
->**Pozor**: Obrazec Doh-Div v eDavkih omogoča tudi uvoz podatkov v CSV obliki. `ib-edavki` ne generirajo obrazca Doh-Div v CSV obliki. Namesto uvoza CSV datoteke, se posluži uvoza XML datoteke, kot je opisan v nadaljevanju.
+>**Pozor**: Obrazec Doh-Div v eDavkih omogoča tudi uvoz podatkov v CSV obliki. `revolut-davki` ne generira obrazca Doh-Div v CSV obliki. Namesto uvoza CSV datoteke, se posluži uvoza XML datoteke, kot je opisan v nadaljevanju.
 
 ![Dokumenti > Uvoz](readme-uvoz.png)
 

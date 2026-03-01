@@ -3,6 +3,12 @@
 *.pyc
 .idea
 __pycache__
+.venv/
+.pytest_cache/
+*.egg-info/
+bsrate-*.xml
+*.csv
+EDP-Common-1.xsd
 !companies.xml
 !ib-affiliates.xml
 !relief-statements.xml

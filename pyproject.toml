@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ib_edavki"
+version = "1.4.8"
+authors = [
+    {name = "Primož Sečnik Kolman", email = "primoz@outlook.com"},
+]
+description = "Revolut eDavki generator"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "requests",
+]
+
+[project.scripts]
+revolut_davki = "revolut_davki:main"
+revolut-davki = "revolut_davki:main"
+
+[tool.setuptools]
+py-modules = ["revolut_davki"]
