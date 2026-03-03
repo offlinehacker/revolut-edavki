@@ -50,7 +50,7 @@ class SyntheticRevolutPipelineTest(unittest.TestCase):
             cmd = [
                 sys.executable,
                 str(script_path),
-                "--revolut",
+                "--csv",
                 "input.csv",
                 "-y",
                 "2025",

@@ -516,10 +516,10 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--revolut",
-        metavar="revolut-file",
+        "--csv",
+        metavar="csv-file",
         required=True,
-        help="Path to Revolut export file",
+        help="Path to Revolut consolidated CSV export file",
     )
     parser.add_argument(
         "-y",
@@ -686,8 +686,8 @@ def main():
             rates[date][currency] = r.text
 
     # Parse Revolut data
-    print(f"Parsing Revolut data from {args.revolut}...")
-    trades, dividends, interests = parse_revolut_data(args.revolut, reportYear, rates)
+    print(f"Parsing Revolut data from {args.csv}...")
+    trades, dividends, interests = parse_revolut_data(args.csv, reportYear, rates)
 
     if test == True:
         statementStartDate = str(reportYear + testYearDiff) + "0101"

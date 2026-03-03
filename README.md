@@ -82,15 +82,15 @@ Odpri datoteko **taxpayer.xml** in vnesi svoje davčne podatke.
 ### Konverzija Revolut poročila v popisne liste primerne za uvoz v eDavke
 
 ```
-revolut_davki --revolut revolut-izvoz.csv [-y report-year] [-t] [--ignore-foreign-tax]
+revolut_davki --csv revolut-izvoz.csv [-y report-year] [-t] [--ignore-foreign-tax]
 ```
 Primer:
 ```
-revolut_davki --revolut consolidated-statement_2025-01-01_2025-12-31.csv -y 2025
+revolut_davki --csv consolidated-statement_2025-01-01_2025-12-31.csv -y 2025
 ```
 Primer brez uveljavljanja tujega davka pri dividendah:
 ```
-revolut_davki --revolut consolidated-statement_2025-01-01_2025-12-31.csv -y 2025 --ignore-foreign-tax
+revolut_davki --csv consolidated-statement_2025-01-01_2025-12-31.csv -y 2025 --ignore-foreign-tax
 ```
 
 Skripta po uspešni konverziji v lokalnem direktoriju ustvari štiri datoteke:
