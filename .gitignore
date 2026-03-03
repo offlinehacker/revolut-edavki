@@ -10,5 +10,4 @@ bsrate-*.xml
 *.csv
 EDP-Common-1.xsd
 !companies.xml
-!ib-affiliates.xml
 !relief-statements.xml

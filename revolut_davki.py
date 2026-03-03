@@ -4,7 +4,6 @@ import argparse
 import datetime
 import glob
 import os
-import urllib.request
 import re
 import sys
 import requests
@@ -277,53 +276,8 @@ def parse_revolut_data(revolut_file, reportYear, rates):
     return trades, dividends, interests
 
 
-def get_entity_code(entities, accountId):
-    for entity in entities:
-        if entity["accountId"] == accountId:
-            return entity["ibEntity"]
-
-    print(
-        "IB Entity for account "
-        + accountId
-        + " "
-        + "not found in flex statement. "
-        + "Check your report settings."
-    )
-    return None
-
-
-def get_affiliate_info(entities, accountId):
-    ibAffiliateCode = get_entity_code(entities, accountId)
-    if not os.path.isfile("ib-affiliates.xml"):
-        urllib.request.urlretrieve(
-            "https://github.com/offlinehacker/revolut-davki/raw/master/ib-affiliates.xml",
-            "ib-affiliates.xml",
-        )
-
-    if os.path.isfile("ib-affiliates.xml"):
-        ibAffiliateInfos = xml.etree.ElementTree.parse("ib-affiliates.xml").getroot()
-        for affiliate in ibAffiliateInfos:
-            if affiliate.find("code").text == str(ibAffiliateCode):
-                return {
-                    "code": affiliate.find("code").text,
-                    "name": affiliate.find("name").text,
-                    "taxNumber": affiliate.find("taxNumber").text,
-                    "address": affiliate.find("address").text,
-                    "country": affiliate.find("country").text,
-                }
-
-    return {
-        "code": "",
-        "name": "",
-        "taxNumber": "",
-        "address": "",
-        "country": "",
-    }
-
-
 def generate_doh_obr(
     taxpayerConfig,
-    ibEntities,
     ibCashTransactionsList,
     rates,
     reportYear,
@@ -508,13 +462,10 @@ def generate_doh_obr(
             continue
 
         Interest = xml.etree.ElementTree.SubElement(Doh_Obr, "Interest")
-        ibAffiliateInfo = get_affiliate_info(ibEntities, interest["accountId"])
-        identificationNumber = interest.get(
-            "identificationNumber", ibAffiliateInfo["taxNumber"]
-        )
-        payerName = interest.get("payerName", ibAffiliateInfo["name"])
-        payerAddress = interest.get("payerAddress", ibAffiliateInfo["address"])
-        payerCountry = interest.get("payerCountry", ibAffiliateInfo["country"])
+        identificationNumber = interest.get("identificationNumber", "")
+        payerName = interest.get("payerName", "")
+        payerAddress = interest.get("payerAddress", "")
+        payerCountry = interest.get("payerCountry", "")
         sourceCountry = interest.get("sourceCountry", payerCountry)
         interestType = interest.get("type", "2")
 
@@ -733,12 +684,6 @@ def main():
         for r in d:
             currency = r.attrib["oznaka"]
             rates[date][currency] = r.text
-
-    # Initialize entity for Revolut
-    ibEntities = [{
-        "accountId": "revolut",
-        "ibEntity": "REVOLUT"
-    }]
 
     # Parse Revolut data
     print(f"Parsing Revolut data from {args.revolut}...")
@@ -1380,7 +1325,6 @@ def main():
     # Generate Doh-Obr.xml for interest
     generate_doh_obr(
         taxpayerConfig,
-        ibEntities,
         [],  # No cash transactions for interest in Revolut
         rates,
         reportYear,
