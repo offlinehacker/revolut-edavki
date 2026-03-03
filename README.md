@@ -45,18 +45,18 @@ uv --version
 
 Namestitev orodja z `uv`:
 ```
-uv tool install git+https://github.com/offlinehacker/revolut-davki.git
+uv tool install https://github.com/offlinehacker/revolut-edavki.git
 ```
 
 Lahko pa ga zaženeš tudi brez trajne namestitve:
 ```
-uvx --from git+https://github.com/offlinehacker/revolut-davki.git revolut_davki --help
+uvx --from https://github.com/offlinehacker/revolut-edavki.git revolut_davki --help
 ```
 
 #### Namestitev s `pip` (alternativa)
 
 ```
-pip install --upgrade git+https://github.com/offlinehacker/revolut-davki.git
+pip install --upgrade https://github.com/offlinehacker/revolut-edavki.git
 ```
 
 ```
