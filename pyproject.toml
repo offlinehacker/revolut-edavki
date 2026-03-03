@@ -3,7 +3,7 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ib_edavki"
+name = "revolut-davki"
 version = "1.4.8"
 authors = [
     {name = "Primož Sečnik Kolman", email = "primoz@outlook.com"},
